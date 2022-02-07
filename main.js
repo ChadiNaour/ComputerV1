@@ -167,86 +167,113 @@ function getNumber(str) {
 
 const reduceOneSidedCoeffs = (equation, order) => {
     const array = [];
-    var i = 0;
-    while (equation && i < 2) {
+    var i = order;
+    while (i >= 0) {
         // console.log("----------------------------------")
-        console.log(i, "equation is",equation);
+        // console.log(i, "equation is", equation);
         var regex1 = (i ? new RegExp("[+-]?[0-9]X\\^" + i, "g") : new RegExp("[+-]?[0-9]X\\^" + i, "g"));
         var regex2 = (i ? new RegExp("[+-]?X\\^" + i, "g") : new RegExp("[+-]?X\\^" + i, "g"));
         var regex3 = new RegExp("X\\^" + i, "g");
-        // const regexp = /[0-9]X\^0/g;
-        // const str = '5X^0+2X^0=4X^2';
-        // console.log(equation);
-        // console.log(regex1);
+
         console.log(regex1, "   |   ", regex2)
-        firstProb = equation.match(regex1);
+        // if (!equation.match(regex3) && i <= order)
+        // {
+        //     array[i] = [0];
+        //     i++;
+        // }
+        // else{
+
+        // }
+        
+        firstProb = equation.match(regex1) ? equation.match(regex1) : [];
         if (firstProb) {
             equation = equation.replace(regex1, '')
-            // console.log(equation);
         }
-        console.log("after first prob", equation, firstProb);
-        // console.log(regex2);
-        secondProb = equation.match(regex2);
-        // console.log(secondProb);
+        // console.log("after first prob", equation, firstProb);
+        secondProb = equation.match(regex2) ? equation.match(regex2) : [];
         if (secondProb) {
-            // console.log("in")
             equation = equation.replace(regex2, '')
         }
-        console.log("after second prob",equation, secondProb);
+        // console.log("after second prob", equation, secondProb);
         if (!firstProb && !secondProb) {
-            // console.log("in")
             array[i] = [0];
-            // console.log(array[i]);
         }
         else if (secondProb) {
-             console.log("probs are : ",firstProb, " , ",secondProb );
-            // console.log('llllll')
             array[i] = firstProb.concat(secondProb);
         }
         else
             array[i] = firstProb;
-        console.log("array[i] : ",array[i]);
-        // console.log("----------------------------------")
-        // if (array[i] != 0)
         var value = 0;
         if (firstProb || secondProb) {
-
-
-            // console.log("in2")
             array[i].forEach(row => {
 
                 row = eval(getMatchingValue(row, regex3))
                 value = value + row;
-                // console.log(row);
-
             })
-            // console.log(value);
         };
         array[i] = value;
-        i++;
-        // console.log("-------------")
+        i--;
+
+        // if(equation.match(regex1))
     }
+    console.log(equation);
+    // console.log("====================================")
+    // console.log("equation after loop before X ==>", equation);
     // console.log(array);
-    if (equation.match(regexForX))
-    {
-        var regexForX = new RegExp(/([+-])?([0-9]+)?X/g);
-        console.log("its in");
+    var regexForX = new RegExp(/([+-])?([0-9]+)?X/g);
+    var Xcoeffs = equation.match(regexForX);
+    if (!array[1])
+        array[1] = 0;
+    if (Xcoeffs) {
+        Xcoeffs.forEach(coeff => {
+            // console.log(coeff);
+            array[1] = array[1] + eval(getMatchingValue(coeff, /X/g))
+        })
+        equation = equation.replace(regexForX, '');
     }
-    console.log("equation is",equation);
+    if (!array[2])
+        array[2] = 0;
+    // console.log("integers equation after X  ==>", equation);
+    // console.log("equation is", equation);
+    // console.log("equation is", equation);
     var regex4 = /[-+]?[0-9]+(\.[1-9]+)?/g;
-    // var regex4 = /[+-]?[0-9]+/g;
     var integers = equation.match(regex4);
-    // console.log("integers",integers);
+    // console.log(integers);
+    if (!array[0])
+        array[0] = 0;
     if (integers) {
         integers.forEach(integer => {
+            // console.log(array[0] + eval(getNumber(integer)));
             array[0] = array[0] + eval(getNumber(integer));
         })
-        // console.log(integers);
     }
     return array;
-    // console.log(array);
-    // console.log(array[2][1])
-    // console.log(getMatchingValue(array[2][1], /X\^2/g));
+}
+
+const defineOrder = (oneSidedEquation) => {
+    var orderX = 0;
+    var r = /X\^([0-9]+)/g;
+    var order;
+
+    if (oneSidedEquation.match(/[-+]?([0-9]+)?X([+-])/g) || oneSidedEquation.match(/[-+]?([0-9]+)?X$/g))
+        orderX = 1;
+    var NormalOrder = ((oneSidedEquation && oneSidedEquation.match(r)) ? oneSidedEquation.match(r).reduce((m, d) => {
+        var ex = d.split('^')[1];
+        console.log("----------")
+        console.log(d);
+        console.log(ex);
+        console.log(m);
+        console.log("----------")
+        if (ex && (getNumber(ex) > getNumber(m))) {
+            return ex;
+        }
+        return m;
+    }, 0) : 0);
+    if (NormalOrder > orderX)
+        order = NormalOrder;
+    else
+        order = orderX;
+    return (order);
 }
 
 
@@ -256,29 +283,47 @@ var sttripped = removeStar(removeSpaces(process.argv[2]));
 var tab = sttripped.split("=");
 var r = /X(\^\d)?/g;
 var r2 = /[^\d]/g;
-// var = (tab[0] ? tab[0].match(r) : tab[1].match(r2));
-// console.log(tab);
-var orderLeft = ((tab[0] && tab[0].match(r)) ? tab[0].match(r).reduce((m, d) => {
-    var ex = d.split('^')[1];
-    if (ex && (ex > m)) {
-        return ex;
-    }
-    return m;
-}, 0) : 0);
+var findXRegex = RegExp(/[-+]?([0-9]+)?X([+-])/g);
+var XorderLeft = 0;
 
-var orderRight = ((tab[1] && tab[1].match(r)) ? tab[1].match(r).reduce((m, d) => {
-    var ex = d.split('^')[1];
-    if (ex && (ex > m)) {
-        return ex;
-    }
-    return m;
-}, 0) : 0);
+// console.log(tab[0]);
+// if (tab[0].match(/[-+]?([0-9]+)?X([+-])/g) || tab[0].match(/[-+]?([0-9]+)?X$/g))
+//     XorderLeft = 1;
+// var = (tab[0] ? tab[0].match(r) : tab[1].match(r2));
+var orderLeft = getNumber(defineOrder(tab[0]));
+var orderRight = getNumber(defineOrder(tab[1]));
+var degree = orderRight > orderLeft ? orderRight : orderLeft;
+console.log("order left :",orderLeft, " | order right :", orderRight);
+console.log("degree : ",degree);
+
+// console.log(tab[0]);
+// var orderLeft = ((tab[0] && tab[0].match(r)) ? tab[0].match(r).reduce((m, d) => {
+//     var ex = d.split('^')[1];
+//     if (ex && (ex > m)) {
+//         return ex;
+//     }
+//     return m;
+// }, 0) : 0);
+
+// if (orderLeft > XorderLeft)
+//     var order = orderLeft;
+// else
+//     order = XorderLeft;
+// if (order == 0 && tab[0].match)
+// console.log("order is : ",order);
+
+// var orderRight = ((tab[1] && tab[1].match(r)) ? tab[1].match(r).reduce((m, d) => {
+//     var ex = d.split('^')[1];
+//     if (ex && (ex > m)) {
+//         return ex;
+//     }
+//     return m;
+// }, 0) : 0);
 // console.log()
 
-var degree = orderRight > orderLeft ? orderRight : orderLeft;
+// var degree = orderRight > orderLeft ? orderRight : orderLeft;
+// console.log(orderLeft,orderRight, degree);
 // var ret = getCoefficients(tab[0], degree);
-console.log(tab[0]);
-console.log("----------------")
 // console.log(tab[1]);
 var ret = reduceOneSidedCoeffs(tab[0], degree);
 // var ret1 = reduceOneSidedCoeffs(tab[1], degree);
@@ -286,7 +331,7 @@ console.log("coeffs dyal jiha lisra", ret)
 // var ret1 = getCoefficients(tab[1], degree);
 // console.log("coeffs dyal jiha limna", ret1)
 // var ReducCoefs = getReducedCoefs(ret, ret1, degree);
-// // console.log(ReducCoefs);
+// console.log(ReducCoefs);
 //     const ReducedEquation = GetEquFromCoefs(ReducCoefs, degree);
 //     // console.log(ReducedEquation);
 
