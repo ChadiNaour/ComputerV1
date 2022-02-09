@@ -171,11 +171,11 @@ const reduceOneSidedCoeffs = (equation, order) => {
     while (i >= 0) {
         // console.log("----------------------------------")
         // console.log(i, "equation is", equation);
-        var regex1 = (i ? new RegExp("[+-]?[0-9]X\\^" + i, "g") : new RegExp("[+-]?[0-9]X\\^" + i, "g"));
-        var regex2 = (i ? new RegExp("[+-]?X\\^" + i, "g") : new RegExp("[+-]?X\\^" + i, "g"));
+        var regex1 = (i ? new RegExp("[+-]([0-9]+)(\.[0-9]+)?X\\^" + i, "g") : new RegExp("[+-]?([0-9]+)(\.[0-9]+)?X\\^" + i, "g"));
+        var regex2 = (i ? new RegExp("[+-]X\\^" + i, "g") : new RegExp("[+-]?X\\^" + i, "g"));
         var regex3 = new RegExp("X\\^" + i, "g");
 
-        console.log(regex1, "   |   ", regex2)
+        // console.log(regex1, "   |   ", regex2)
         // if (!equation.match(regex3) && i <= order)
         // {
         //     array[i] = [0];
@@ -215,8 +215,9 @@ const reduceOneSidedCoeffs = (equation, order) => {
         i--;
 
         // if(equation.match(regex1))
+            // console.log(equation);
     }
-    console.log(equation);
+    // console.log("equation after boucle",equation);
     // console.log("====================================")
     // console.log("equation after loop before X ==>", equation);
     // console.log(array);
@@ -257,18 +258,21 @@ const defineOrder = (oneSidedEquation) => {
 
     if (oneSidedEquation.match(/[-+]?([0-9]+)?X([+-])/g) || oneSidedEquation.match(/[-+]?([0-9]+)?X$/g))
         orderX = 1;
+        // console.log("----------")
     var NormalOrder = ((oneSidedEquation && oneSidedEquation.match(r)) ? oneSidedEquation.match(r).reduce((m, d) => {
         var ex = d.split('^')[1];
-        console.log("----------")
-        console.log(d);
-        console.log(ex);
-        console.log(m);
-        console.log("----------")
-        if (ex && (getNumber(ex) > getNumber(m))) {
+        // console.log("d = ", d , " | ex : ", ex, " | m = ", m);
+        // console.log(d);
+        // console.log(ex);
+        // console.log(m);
+        if (ex && eval(ex) > eval(m)) {
+            // console.log("ex > m")
             return ex;
         }
         return m;
     }, 0) : 0);
+    // console.log("----------")
+    // console.log(NormalOrder);
     if (NormalOrder > orderX)
         order = NormalOrder;
     else
@@ -277,7 +281,7 @@ const defineOrder = (oneSidedEquation) => {
 }
 
 
-// if (process.argv.length == 3 && process.argv[2] && process.argv[2].match(/^((?:\-?\+?(?:\s+)?\d+(?:\.\d+)?(?:\s+)?\*(?:\s+)?X\^\d+|\d+(?:\.\d+)?)(?:(?:\s+)?\+(?:\s+)?|(?:\s+)?\-(?:\s+)?)?)+(?:\s+)?=(?:\s+)?((?:[+-]?\d+(?:\.\d+)?(?:\s+)?\*(?:\s+)?X\^\d+|\-?\d+(?:\.\d+)?)(?:(?:\s+)?\+(?:\s+)?|(?:\s+)?\-(?:\s+)?)?)+$/g)) {
+if (process.argv.length == 3 && process.argv[2] && process.argv[2].match(/^((?:\-?\+?(?:\s+)?\d+(?:\.\d+)?(?:\s+)?\*(?:\s+)?X\^\d+|\d+(?:\.\d+)?)(?:(?:\s+)?\+(?:\s+)?|(?:\s+)?\-(?:\s+)?)?)+(?:\s+)?=(?:\s+)?((?:[+-]?\d+(?:\.\d+)?(?:\s+)?\*(?:\s+)?X\^\d+|\-?\d+(?:\.\d+)?)(?:(?:\s+)?\+(?:\s+)?|(?:\s+)?\-(?:\s+)?)?)+$/g)) {
 var textField = process.argv[2];
 var sttripped = removeStar(removeSpaces(process.argv[2]));
 var tab = sttripped.split("=");
@@ -287,11 +291,13 @@ var findXRegex = RegExp(/[-+]?([0-9]+)?X([+-])/g);
 var XorderLeft = 0;
 
 // console.log(tab[0]);
+// console.log(tab[1]);
 // if (tab[0].match(/[-+]?([0-9]+)?X([+-])/g) || tab[0].match(/[-+]?([0-9]+)?X$/g))
 //     XorderLeft = 1;
 // var = (tab[0] ? tab[0].match(r) : tab[1].match(r2));
-var orderLeft = getNumber(defineOrder(tab[0]));
-var orderRight = getNumber(defineOrder(tab[1]));
+var orderLeft = eval(defineOrder(tab[0]));
+// console.log(orderLeft);
+var orderRight = eval(defineOrder(tab[1]));
 var degree = orderRight > orderLeft ? orderRight : orderLeft;
 console.log("order left :",orderLeft, " | order right :", orderRight);
 console.log("degree : ",degree);
@@ -325,100 +331,102 @@ console.log("degree : ",degree);
 // console.log(orderLeft,orderRight, degree);
 // var ret = getCoefficients(tab[0], degree);
 // console.log(tab[1]);
+///////////////////////////////////////////////////////////////
 var ret = reduceOneSidedCoeffs(tab[0], degree);
-// var ret1 = reduceOneSidedCoeffs(tab[1], degree);
+var ret1 = reduceOneSidedCoeffs(tab[1], degree);
 console.log("coeffs dyal jiha lisra", ret)
 // var ret1 = getCoefficients(tab[1], degree);
-// console.log("coeffs dyal jiha limna", ret1)
-// var ReducCoefs = getReducedCoefs(ret, ret1, degree);
+console.log("coeffs dyal jiha limna", ret1)
+var ReducCoefs = getReducedCoefs(ret, ret1, degree);
 // console.log(ReducCoefs);
-//     const ReducedEquation = GetEquFromCoefs(ReducCoefs, degree);
-//     // console.log(ReducedEquation);
+    const ReducedEquation = GetEquFromCoefs(ReducCoefs, degree);
+    // console.log(ReducedEquation);
+///////////////////////////////////////////////////////////////
 
-//     console.log("Reduced form:", ReducedEquation);
-//     console.log("Polynomial degree:", degree);
-//     if (degree > 2) {
-//         console.log("The polynomial degree is stricly greater than 2, I can't solve.")
-//     }
-//     else {
-//         // var coeffs = reduceOneSidedCoeffs(removeStar(removeSpaces(ReducedEquation)), 2);
-//         var coeffs = ReducCoefs;
-//         for (var j = 0;j <= 2; j++)
-//         {
-//             if (!coeffs[j])
-//                 coeffs[j] = 0;
-//         }
-//         console.log(coeffs);
-//     // }
-//         // program to solve quadratic equation
-//         let root1;
-//         let root2;
+    console.log("Reduced form:", ReducedEquation);
+    console.log("Polynomial degree:", degree);
+    if (degree > 2) {
+        console.log("The polynomial degree is stricly greater than 2, I can't solve.")
+    }
+    else {
+        // var coeffs = reduceOneSidedCoeffs(removeStar(removeSpaces(ReducedEquation)), 2);
+        var coeffs = ReducCoefs;
+        for (var j = 0;j <= 2; j++)
+        {
+            if (!coeffs[j])
+                coeffs[j] = 0;
+        }
+        console.log(coeffs);
+    // }
+        // program to solve quadratic equation
+        let root1;
+        let root2;
 
-//         // // take input from the user
-//         let a = coeffs[2];
-//         let b = coeffs[1];
-//         let c = coeffs[0];
+        // // take input from the user
+        let a = coeffs[2];
+        let b = coeffs[1];
+        let c = coeffs[0];
 
-//         if (a == 0 && b == 0 && c == 0) {
-//             console.log("all real numbers are solutions")
-//             return (0);
-//         }
-//         else if (a == 0 && b == 0 && c != 0) {
-//             console.log("there is no solutions.")
-//             return (0);
-//         }
-//         if (a == 0 && degree == 1) {
-//             console.log("The solution is:")
-//             console.log((-c / b).toFixed(2))
-//             return (0);
-//         }
+        if (a == 0 && b == 0 && c == 0) {
+            console.log("all real numbers are solutions")
+            return (0);
+        }
+        else if (a == 0 && b == 0 && c != 0) {
+            console.log("there is no solutions.")
+            return (0);
+        }
+        if (a == 0 && degree == 1) {
+            console.log("The solution is:")
+            console.log((-c / b).toFixed(2))
+            return (0);
+        }
 
-//         console.log("a is : ",a,"\nb is : ", b, "\nc is : ", c)
+        console.log("a is : ",a,"\nb is : ", b, "\nc is : ", c)
 
-//         // calculate discriminant
-//         let discriminant = (b * b) - (4 * a * c);
+        // calculate discriminant
+        let discriminant = (b * b) - (4 * a * c);
 
-//         console.log("the discriminant is : ",discriminant)
-//         // console.log("te discrimanat root is : ", Math.sqrt(discriminant))
+        console.log("the discriminant is : ",discriminant)
+        // console.log("te discrimanat root is : ", Math.sqrt(discriminant))
 
-//         //condition for real and different roots
-//         if (discriminant > 0) {
-//             console.log("Discriminant is strictly positive, the two solutions are:")
-//             root1 = ((-b + findSqrt(discriminant)) / (2 * a)).toFixed(6);
-//             root2 = ((-b - findSqrt(discriminant)) / (2 * a)).toFixed(6);
-//             // realRoot1 = ((-b + Math.sqrt(discriminant)) / (2 * a)).toFixed(6);
-//             // realRoot2 = ((-b - Math.sqrt(discriminant)) / (2 * a)).toFixed(6);
+        //condition for real and different roots
+        if (discriminant > 0) {
+            console.log("Discriminant is strictly positive, the two solutions are:")
+            root1 = ((-b + findSqrt(discriminant)) / (2 * a)).toFixed(6);
+            root2 = ((-b - findSqrt(discriminant)) / (2 * a)).toFixed(6);
+            // realRoot1 = ((-b + Math.sqrt(discriminant)) / (2 * a)).toFixed(6);
+            // realRoot2 = ((-b - Math.sqrt(discriminant)) / (2 * a)).toFixed(6);
 
-//             console.log(root2);
-//             console.log(root1);
-//             // console.log("\nroots with math sqrt");
-//             // console.log(realRoot2);
-//             // console.log(realRoot1);
-//             // result
-//             // console.log(`The roots of quadratic equation are ${root1} and ${root2}`);
-//         }
+            console.log(root2);
+            console.log(root1);
+            // console.log("\nroots with math sqrt");
+            // console.log(realRoot2);
+            // console.log(realRoot1);
+            // result
+            // console.log(`The roots of quadratic equation are ${root1} and ${root2}`);
+        }
 
-//         // condition for real and equal roots
-//         else if (discriminant == 0) {
-//             console.log("Discriminant is null, the only solution is:")
-//             root1 = root2 = (-b / (2 * a)).toFixed(6);
+        // condition for real and equal roots
+        else if (discriminant == 0) {
+            console.log("Discriminant is null, the only solution is:")
+            root1 = root2 = (-b / (2 * a)).toFixed(6);
 
-//             // result
-//             console.log(root1);
-//         }
+            // result
+            console.log(root1);
+        }
 
-//         // if roots are not real
-//         else {
-//             console.log("Discriminant is strictly negative, the two solutions are:")
-//             let realPart = (-b / (2 * a)).toFixed(2);
-//             let imagPart = (findSqrt(-discriminant) / (2 * a)).toFixed(2);
+        // if roots are not real
+        else {
+            console.log("Discriminant is strictly negative, the two solutions are:")
+            let realPart = (-b / (2 * a)).toFixed(2);
+            let imagPart = (findSqrt(-discriminant) / (2 * a)).toFixed(2);
 
-//             // result
-//             console.log("roots with math sqrt");
-//             console.log(realPart + " + " + imagPart + "i");
-//             console.log(realPart + " - " + imagPart + "i");
-//         }
-//     }
-// }
-// else
-//     console.log("Syntax Error");
+            // result
+            console.log("roots with math sqrt");
+            console.log(realPart + " + " + imagPart + "i");
+            console.log(realPart + " - " + imagPart + "i");
+        }
+    }
+}
+else
+    console.log("Syntax Error");

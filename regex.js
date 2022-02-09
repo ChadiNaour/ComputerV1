@@ -15,5 +15,5 @@ function getMatchingValue(equation, regx) {
             : coefficient;
 }
 
-var str = "+1.15678X^0"
-console.log(str.match(/[-+]?([0-9]+)?X\^([0-9]+)/g))
+var str = "+121324.44444"
+console.log(str.match(/[+-]?([0-9]+)(\.[0-9]+)?/g))

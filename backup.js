@@ -27,6 +27,12 @@ function getRegexSource(regex) {
     const _regex = regex;
     return (_regex.source).toString().replace(/\\/g, '');
 }
+
+8
+0
+-6 0 -5.6
+
+
 function getCoefficients(equation) {
     // Used eval instead of parseFloat to support Fractions
     const _equation = equation;
