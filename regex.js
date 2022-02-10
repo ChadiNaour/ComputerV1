@@ -15,5 +15,16 @@ function getMatchingValue(equation, regx) {
             : coefficient;
 }
 
-var str = "+121324.44444"
-console.log(str.match(/[+-]?([0-9]+)(\.[0-9]+)?/g))
+var str = "5X^0-4X^1"
+var str1 = "5"
+console.log(str.match(/[+-]?([0-9]+)(\.[0-9]+)?X\^1/g))
+
+// entry can be n or +-n * X or +-n * X^m or X^m or X
+
+// without coefficient prob
+
+// 1 (* x^2)
+//(1 *) X^2
+
+//5 + 4x = 0
+// x = -5/4 
